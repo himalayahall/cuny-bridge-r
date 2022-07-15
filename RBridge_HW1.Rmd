@@ -1,0 +1,114 @@
+---
+title: "RBridge_HW1"
+author: "Jawaid Hakim"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Factorial
+
+```{r}
+#' Factorial.
+#' 
+#' @param n A non-negative integer
+#' @return n!
+#' @examples
+#' factorial(10): 3628800
+factorial <- function(n)
+{
+    if (n <= 1)
+    {
+        return (1)        
+    }
+    return (n * factorial(n - 1))        
+}
+```
+
+## Setup test cases and expected results
+
+```{r}
+test_cases <- c(0:10)
+expected <- c(1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800)
+```
+
+## Run tests
+
+| Note: lapply is used to apply factorial function to vector of test cases
+| unlist is used to unpack list into a vector
+
+```{r}
+# 
+results <- unlist(lapply(test_cases, factorial))
+```
+
+## Validate results
+
+```{r}
+if (identical(expected, results) == TRUE)
+{
+    print("Well done!")    
+} else 
+{
+     print("Failed!")    
+}
+```
+
+# Compute 12-factorial
+
+```{r}
+factorial(12)
+```
+
+# Create numeric vector with sequence 20:50 by 5
+
+Here we use seq.int for efficiency
+
+```{r}
+seq <- seq.int(from = 20, to = 50, by = 5)
+print(seq)
+```
+
+# Quadratic equation solver
+
+```{r}
+quadratic <- function(a, b, c)
+#' Quadratic equation solver (standard form). Does not handle imaginary numbers, will stop with error if sqrt() term is negative 
+#' 
+#' @param a A
+#' @param b B
+#' @param c C
+#' @return Solution(s) for the standard form as factors.
+#' @examples
+#' quadratic(1, -8, 16): Levels: 4
+#' quadratic(1, -4, -5): Levels: -1 5
+{
+    sqrt_term <- (b**2 - (4 * a * c))
+    stopifnot(sqrt_term >= 0)
+
+    denom <- 2 * a
+
+    sqrt_term_eval = sqrt(sqrt_term)
+    sol1 <- (-b + sqrt_term_eval) / denom
+
+    sol2 <- (-b - sqrt_term_eval) / denom
+    
+    solution <- factor(c(sol1, sol2))[1]
+    return (solution)
+}
+
+```
+
+## Test quadratic function
+
+```{r}
+
+# x = 4
+quadratic(1, -8, 16)
+
+# x = 1, x = -5
+quadratic(1, -4, -5)
+```
