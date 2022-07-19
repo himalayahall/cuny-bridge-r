@@ -1,0 +1,83 @@
+---
+title: "RBridge_HW2"
+author: "Jawaid Hakim"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Bonus point - reading original data set from GitHub
+votes <- read.csv("https://vincentarelbundock.github.io/Rdatasets/csv/carData/Florida.csv")
+summary(votes)
+```
+```{r}
+# Define function to print  mean and median votes count for given data frame and candidate
+mean_idx <- 1
+median_idx <-3
+
+#' print_mean_median
+#' 
+#' @param df Date frame
+#' @param c Candidate name.
+#' @return None
+#' @examples
+#' print_mean_median(df, 'HARRIS')
+print_mean_median <- function(df, candidate)
+{
+    ucname = toupper(candidate)
+    if (ucname %in% colnames(df))
+    {
+    candidate_summary <- summary(df[ucname])
+    sprintf("Candidate %s has mean: %s and median: %s", ucname, candidate_summary[mean_idx], candidate_summary[median_idx])
+    }
+    else 
+    {
+        sprintf('Candidate name not found, names are case-sensitive: %s', candidate)
+    }
+}
+
+```
+
+```{r}
+print_mean_median(votes, 'BUCHANAN')
+print_mean_median(votes, 'Nader')
+```
+
+```{r}
+require('dplyr')
+```
+
+```{r}
+# Remove columns: select minor party candidates by removing GORE and BUSH cols
+minor_party_candidates <- votes %>% select(X, !(BUSH | GORE))
+summary(minor_party_candidates)
+```
+```{r}
+# Remove rows - remove counties with fewer than 5000 votes
+old_county_count = nrow(minor_party_candidates)
+minor_party_candidates_major_counties <- minor_party_candidates %>% filter(Total >= 5000)
+new_county_count = nrow(minor_party_candidates_major_counties)
+
+sprintf('Old row count was: %d, New row count is: %d', old_county_count, new_county_count)
+
+summary(minor_party_candidates_major_counties)
+```
+
+```{r}
+print_mean_median(minor_party_candidates_major_counties, 'BUCHANAN')
+print_mean_median(minor_party_candidates_major_counties, 'NADER')
+```
+
+```{r}
+# Change column values. This data set does not contain any string columns So, instead, change all 0 vote counts for HARRIS to NA
+minor_party_candidates_major_counties
+harris_df <- minor_party_candidates_major_counties["HARRIS"]
+harris_df[harris_df == 0] <- NA
+minor_party_candidates_major_counties["HARRIS"] <- harris_df
+head(minor_party_candidates_major_counties, 10)
+```
+
