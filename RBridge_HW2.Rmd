@@ -65,16 +65,15 @@ require('dplyr')
 
 ```{r}
 # Remove columns: select minor party candidates by removing GORE and BUSH cols
-minor_party_candidates <- votes %>% select(X, !(BUSH | GORE))
+minor_party_candidates <- votes %>% select(!(BUSH | GORE))
 summary(minor_party_candidates)
+
 ```
 ```{r}
 # Remove rows - remove counties with fewer than 5000 votes
-old_county_count = nrow(minor_party_candidates)
 minor_party_candidates_major_counties <- minor_party_candidates %>% filter(Total >= 5000)
-new_county_count = nrow(minor_party_candidates_major_counties)
 
-sprintf('Old row count was: %d, New row count is: %d', old_county_count, new_county_count)
+sprintf('Old row count was: %d, New row count is: %d', nrow(minor_party_candidates), nrow(minor_party_candidates_major_counties))
 
 summary(minor_party_candidates_major_counties)
 ```
@@ -85,15 +84,15 @@ print_mean_median(minor_party_candidates_major_counties, 'nader')
 ```
 
 ```{r}
-# Change column values. This data set does not contain any string columns So, instead, change all 0 vote counts for HARRIS to NA
-head(minor_party_candidates_major_counties)
+# Change column values. This data set does not contain any string columns. Instead, replace 0 vote counts for HARRIS to NA
+#head(minor_party_candidates_major_counties)
 
 # Get a copy of HARRIS column and modify: replace 0 values with NA
-harris_df <- minor_party_candidates_major_counties["HARRIS"]
-harris_df[harris_df == 0] <- NA
+harris_col <- minor_party_candidates_major_counties["HARRIS"]
+harris_col[harris_col == 0] <- NA
 
 # Replace HARRIS column in original data frame with modified column
-minor_party_candidates_major_counties["HARRIS"] <- harris_df
+minor_party_candidates_major_counties["HARRIS"] <- harris_col
 head(minor_party_candidates_major_counties, 10)
 ```
 
