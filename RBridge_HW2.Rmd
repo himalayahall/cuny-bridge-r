@@ -10,22 +10,34 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-# Bonus point - reading original data set from GitHub
-votes <- read.csv("https://vincentarelbundock.github.io/Rdatasets/csv/carData/Florida.csv")
+# Download file
+# download.file("https://vincentarelbundock.github.io/Rdatasets/csv/carData/Florida.csv", destfile = 'FloridaVote.csv')
+
+# Read from local file
+votes <- read.csv("FloridaVote.csv")
 summary(votes)
 ```
+
+
 ```{r}
-# Define function to print  mean and median votes count for given data frame and candidate
+# Bonus points: read CSV file from GitHub - use 'Raw' file URL from GitHub
+v2 = read.csv("https://raw.githubusercontent.com/himalayahall/cuny-bridge-r/main/FloridaVote.csv")
+summary(v2)
+```
+
+
+```{r}
+# Define function to print  mean and median vote count for  data frame + candidate
 mean_idx <- 1
 median_idx <-3
 
 #' print_mean_median
 #' 
 #' @param df Date frame
-#' @param c Candidate name.
+#' @param candidate Candidate name. Case insensitive.
 #' @return None
 #' @examples
-#' print_mean_median(df, 'HARRIS')
+#' print_mean_median(df, 'HARRIS'), print_mean_median(df, 'Gore')
 print_mean_median <- function(df, candidate)
 {
     ucname = toupper(candidate)
@@ -43,8 +55,8 @@ print_mean_median <- function(df, candidate)
 ```
 
 ```{r}
-print_mean_median(votes, 'BUCHANAN')
-print_mean_median(votes, 'Nader')
+print_mean_median(votes, 'buchanan')
+print_mean_median(votes, 'nader')
 ```
 
 ```{r}
@@ -68,15 +80,19 @@ summary(minor_party_candidates_major_counties)
 ```
 
 ```{r}
-print_mean_median(minor_party_candidates_major_counties, 'BUCHANAN')
-print_mean_median(minor_party_candidates_major_counties, 'NADER')
+print_mean_median(minor_party_candidates_major_counties, 'buchanan')
+print_mean_median(minor_party_candidates_major_counties, 'nader')
 ```
 
 ```{r}
 # Change column values. This data set does not contain any string columns So, instead, change all 0 vote counts for HARRIS to NA
-minor_party_candidates_major_counties
+head(minor_party_candidates_major_counties)
+
+# Get a copy of HARRIS column and modify: replace 0 values with NA
 harris_df <- minor_party_candidates_major_counties["HARRIS"]
 harris_df[harris_df == 0] <- NA
+
+# Replace HARRIS column in original data frame with modified column
 minor_party_candidates_major_counties["HARRIS"] <- harris_df
 head(minor_party_candidates_major_counties, 10)
 ```

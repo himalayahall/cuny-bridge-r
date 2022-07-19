@@ -370,8 +370,11 @@ pre code {
 </div>
 
 
-<pre class="r"><code># Bonus point - reading original data set from GitHub
-votes &lt;- read.csv(&quot;https://vincentarelbundock.github.io/Rdatasets/csv/carData/Florida.csv&quot;)
+<pre class="r"><code># Download file
+# download.file(&quot;https://vincentarelbundock.github.io/Rdatasets/csv/carData/Florida.csv&quot;, destfile = &#39;FloridaVote.csv&#39;)
+
+# Read from local file
+votes &lt;- read.csv(&quot;FloridaVote.csv&quot;)
 summary(votes)</code></pre>
 <pre><code>##       X                  GORE             BUSH           BUCHANAN     
 ##  Length:67          Min.   :   788   Min.   :  1316   Min.   :   9.0  
@@ -394,17 +397,41 @@ summary(votes)</code></pre>
 ##  Mean   : 19.03   Mean   : 27.45   Mean   :  63.82   Mean   : 88978  
 ##  3rd Qu.:  5.00   3rd Qu.: 32.00   3rd Qu.:  20.50   3rd Qu.:102874  
 ##  Max.   :658.00   Max.   :167.00   Max.   :2927.00   Max.   :625269</code></pre>
-<pre class="r"><code># Define function to print  mean and median votes count for given data frame and candidate
+<pre class="r"><code># Bonus points: read CSV file from GitHub - use &#39;Raw&#39; file URL from GitHub
+v2 = read.csv(&quot;https://raw.githubusercontent.com/himalayahall/cuny-bridge-r/main/FloridaVote.csv&quot;)
+summary(v2)</code></pre>
+<pre><code>##       X                  GORE             BUSH           BUCHANAN     
+##  Length:67          Min.   :   788   Min.   :  1316   Min.   :   9.0  
+##  Class :character   1st Qu.:  3055   1st Qu.:  4746   1st Qu.:  46.5  
+##  Mode  :character   Median : 14152   Median : 20196   Median : 114.0  
+##                     Mean   : 43341   Mean   : 43356   Mean   : 258.5  
+##                     3rd Qu.: 45974   3rd Qu.: 56542   3rd Qu.: 285.5  
+##                     Max.   :386518   Max.   :289456   Max.   :3407.0  
+##      NADER          BROWNE          HAGELIN          HARRIS      
+##  Min.   :  19   Min.   :   4.0   Min.   :  0.0   Min.   :   0.0  
+##  1st Qu.:  95   1st Qu.:  23.5   1st Qu.:  3.0   1st Qu.:   1.0  
+##  Median : 562   Median : 116.0   Median : 13.0   Median :   4.0  
+##  Mean   :1441   Mean   : 280.7   Mean   : 34.1   Mean   : 156.3  
+##  3rd Qu.:1871   3rd Qu.: 321.5   3rd Qu.: 33.5   3rd Qu.:   8.5  
+##  Max.   :9986   Max.   :3211.0   Max.   :444.0   Max.   :9888.0  
+##    MCREYNOLDS       MOOREHEAD         PHILLIPS           Total       
+##  Min.   :  0.00   Min.   :  0.00   Min.   :   0.00   Min.   :  2403  
+##  1st Qu.:  1.00   1st Qu.:  4.00   1st Qu.:   3.00   1st Qu.:  8080  
+##  Median :  3.00   Median : 12.00   Median :  10.00   Median : 34941  
+##  Mean   : 19.03   Mean   : 27.45   Mean   :  63.82   Mean   : 88978  
+##  3rd Qu.:  5.00   3rd Qu.: 32.00   3rd Qu.:  20.50   3rd Qu.:102874  
+##  Max.   :658.00   Max.   :167.00   Max.   :2927.00   Max.   :625269</code></pre>
+<pre class="r"><code># Define function to print  mean and median vote count for  data frame + candidate
 mean_idx &lt;- 1
 median_idx &lt;-3
 
 #&#39; print_mean_median
 #&#39; 
 #&#39; @param df Date frame
-#&#39; @param c Candidate name.
+#&#39; @param candidate Candidate name. Case insensitive.
 #&#39; @return None
 #&#39; @examples
-#&#39; print_mean_median(df, &#39;HARRIS&#39;)
+#&#39; print_mean_median(df, &#39;HARRIS&#39;), print_mean_median(df, &#39;Gore&#39;)
 print_mean_median &lt;- function(df, candidate)
 {
     ucname = toupper(candidate)
@@ -418,9 +445,9 @@ print_mean_median &lt;- function(df, candidate)
         sprintf(&#39;Candidate name not found, names are case-sensitive: %s&#39;, candidate)
     }
 }</code></pre>
-<pre class="r"><code>print_mean_median(votes, &#39;BUCHANAN&#39;)</code></pre>
+<pre class="r"><code>print_mean_median(votes, &#39;buchanan&#39;)</code></pre>
 <pre><code>## [1] &quot;Candidate BUCHANAN has mean: Min.   :   9.0   and median: Median : 114.0  &quot;</code></pre>
-<pre class="r"><code>print_mean_median(votes, &#39;Nader&#39;)</code></pre>
+<pre class="r"><code>print_mean_median(votes, &#39;nader&#39;)</code></pre>
 <pre><code>## [1] &quot;Candidate NADER has mean: Min.   :  19   and median: Median : 562  &quot;</code></pre>
 <pre class="r"><code>require(&#39;dplyr&#39;)</code></pre>
 <pre><code>## Loading required package: dplyr</code></pre>
@@ -461,10 +488,9 @@ old_county_count = nrow(minor_party_candidates)
 minor_party_candidates_major_counties &lt;- minor_party_candidates %&gt;% filter(Total &gt;= 5000)
 new_county_count = nrow(minor_party_candidates_major_counties)
 
-sprintf(&#39;Old row count: %d, New row count: %d&#39;, old_county_count, new_county_count)</code></pre>
-<pre><code>## [1] &quot;Old row count: 67, New row count: 60&quot;</code></pre>
-<pre class="r"><code>#rownames(minor_party_candidates)
-summary(minor_party_candidates_major_counties)</code></pre>
+sprintf(&#39;Old row count was: %d, New row count is: %d&#39;, old_county_count, new_county_count)</code></pre>
+<pre><code>## [1] &quot;Old row count was: 67, New row count is: 60&quot;</code></pre>
+<pre class="r"><code>summary(minor_party_candidates_major_counties)</code></pre>
 <pre><code>##       X                BUCHANAN           NADER            BROWNE      
 ##  Length:60          Min.   :  22.00   Min.   :  39.0   Min.   :   4.0  
 ##  Class :character   1st Qu.:  75.25   1st Qu.: 146.5   1st Qu.:  38.0  
@@ -486,55 +512,52 @@ summary(minor_party_candidates_major_counties)</code></pre>
 ##  Mean   :  71.02   Mean   : 98937  
 ##  3rd Qu.:  23.25   3rd Qu.:111827  
 ##  Max.   :2927.00   Max.   :625269</code></pre>
-<pre class="r"><code>print_mean_median(minor_party_candidates_major_counties, &#39;BUCHANAN&#39;)</code></pre>
+<pre class="r"><code>print_mean_median(minor_party_candidates_major_counties, &#39;buchanan&#39;)</code></pre>
 <pre><code>## [1] &quot;Candidate BUCHANAN has mean: Min.   :  22.00   and median: Median : 134.50  &quot;</code></pre>
-<pre class="r"><code>print_mean_median(minor_party_candidates_major_counties, &#39;NADER&#39;)</code></pre>
+<pre class="r"><code>print_mean_median(minor_party_candidates_major_counties, &#39;nader&#39;)</code></pre>
 <pre><code>## [1] &quot;Candidate NADER has mean: Min.   :  39.0   and median: Median : 889.0  &quot;</code></pre>
-<pre class="r"><code># Change 0 votes for HARRIS to NA
-harris_df &lt;- minor_party_candidates_major_counties[&quot;HARRIS&quot;]
-harris_df[harris_df == 0] &lt;- NA
-minor_party_candidates_major_counties[&quot;HARRIS&quot;] &lt;- harris_df
+<pre class="r"><code># Change column values. This data set does not contain any string columns So, instead, change all 0 vote counts for HARRIS to NA
 minor_party_candidates_major_counties</code></pre>
 <pre><code>##               X BUCHANAN NADER BROWNE HAGELIN HARRIS MCREYNOLDS MOOREHEAD
 ## 1       ALACHUA      262  3215    658      42      4        658        21
-## 2         BAKER       73    53     17       3     NA          0         3
+## 2         BAKER       73    53     17       3      0          0         3
 ## 3           BAY      248   828    171      18      5          3        37
-## 4      BRADFORD       65    84     28       2     NA          0         3
+## 4      BRADFORD       65    84     28       2      0          0         3
 ## 5       BREVARD      570  4470    643      39     11         11        76
 ## 6       BROWARD      789  7099   1212     128     49         35       123
-## 7       CALHOUN       90    39     10       1     NA          1         3
+## 7       CALHOUN       90    39     10       1      0          1         3
 ## 8     CHARLOTTE      182  1461    127      15      6          3        12
 ## 9        CITRUS      270  1378    194      16      5          0        28
 ## 10         CLAY      186   562    204      14      1          3         9
 ## 11      COLLIER      122  1400    185      34      7          4        29
 ## 12     COLUMBIA       89   258    127       7      1          2         5
 ## 13         DADE      561  5355    759     119     88         36       124
-## 14      DE.SOTO       36   157     23       0     NA          3         2
+## 14      DE.SOTO       36   157     23       0      0          3         2
 ## 15        DUVAL      650  2752    954     160     36         16        41
 ## 16     ESCAMBIA      504  1729    297      24      6          3        20
 ## 17      FLAGLER       83   435     60       4      1          3        12
 ## 18      GADSDEN       39   139     24       4      7          3        12
-## 19    GILCHRIST       29    97     52       1     NA          0         4
+## 19    GILCHRIST       29    97     52       1      0          0         4
 ## 20         GULF       71    86     21       4      2          2         9
-## 21       HARDEE       30    75     17       2     NA          0         3
+## 21       HARDEE       30    75     17       2      0          0         3
 ## 22       HENDRY       22   103     11       1      3          2         2
 ## 23     HERNANDO      242  1501    116      26      8          4        22
 ## 24    HIGHLANDS       99   409     51      14      5          3         7
 ## 25 HILLSBOROUGH      836  7348   1104     215     35         29       150
 ## 26       HOLMES       76    91     18       7      1          3         2
 ## 27 INDIAN.RIVER      105   950    123      13      4          2        10
-## 28      JACKSON      102   138     40       2     NA          1         7
+## 28      JACKSON      102   138     40       2      0          1         7
 ## 29    JEFFERSON       29    76     14       1      2          1         0
 ## 30         LAKE      289  1459    203      36      4          1        14
 ## 31          LEE      305  3587    538      81     30          5        96
 ## 32         LEON      282  1932    330      28      9          7        31
 ## 33         LEVY       67   284     92       1      1          1        11
-## 34      MADISON       29    54     18       2     NA          1         5
+## 34      MADISON       29    54     18       2      0          1         5
 ## 35      MANATEE      272  2489    243      35      5          3        26
 ## 36       MARION      563  1810    361      26     14          6        49
 ## 37       MARTIN      108  1075    105      29     13          8        12
 ## 38       MONROE       47  1090    162      26      1          0         7
-## 39       NASSAU       90   255     63       8     NA          4         3
+## 39       NASSAU       90   255     63       8      0          4         3
 ## 40     OKALOOSA      267   984    313      15      4          2        20
 ## 41   OKEECHOBEE       43   131     21       4      1          1         4
 ## 42       ORANGE      446  3881    892      65     13          7        45
@@ -551,11 +574,11 @@ minor_party_candidates_major_counties</code></pre>
 ## 53     SEMINOLE      194  1940    551      38     38          5        70
 ## 54       SUMTER      114   307     53       2      2          0        17
 ## 55     SUWANNEE      108   182     53       4      2          0         5
-## 56       TAYLOR       27    59      4       3     NA          1         1
+## 56       TAYLOR       27    59      4       3      0          1         1
 ## 57      VOLUSIA      396  2436   3211      33   9888          3        59
 ## 58      WAKULLA       46   149     30       3      2          1         6
 ## 59       WALTON      120   265     68      11      3          2        18
-## 60   WASHINGTON       88    93     32      20     NA          0         5
+## 60   WASHINGTON       88    93     32      20      0          0         5
 ##    PHILLIPS  Total
 ## 1        20  86242
 ## 2         3   8154
@@ -617,6 +640,32 @@ minor_party_candidates_major_counties</code></pre>
 ## 58        0   8583
 ## 59        7  18307
 ## 60        9   8026</code></pre>
+<pre class="r"><code>harris_df &lt;- minor_party_candidates_major_counties[&quot;HARRIS&quot;]
+harris_df[harris_df == 0] &lt;- NA
+minor_party_candidates_major_counties[&quot;HARRIS&quot;] &lt;- harris_df
+head(minor_party_candidates_major_counties, 10)</code></pre>
+<pre><code>##            X BUCHANAN NADER BROWNE HAGELIN HARRIS MCREYNOLDS MOOREHEAD PHILLIPS
+## 1    ALACHUA      262  3215    658      42      4        658        21       20
+## 2      BAKER       73    53     17       3     NA          0         3        3
+## 3        BAY      248   828    171      18      5          3        37       18
+## 4   BRADFORD       65    84     28       2     NA          0         3        2
+## 5    BREVARD      570  4470    643      39     11         11        76       72
+## 6    BROWARD      789  7099   1212     128     49         35       123       74
+## 7    CALHOUN       90    39     10       1     NA          1         3        2
+## 8  CHARLOTTE      182  1461    127      15      6          3        12       19
+## 9     CITRUS      270  1378    194      16      5          0        28       18
+## 10      CLAY      186   562    204      14      1          3         9        6
+##     Total
+## 1   86242
+## 2    8154
+## 3   58815
+## 4    8669
+## 5  218395
+## 6  573306
+## 7    5174
+## 8   66885
+## 9   57154
+## 10  57360</code></pre>
 
 
 
