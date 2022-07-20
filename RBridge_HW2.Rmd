@@ -55,6 +55,7 @@ print_mean_median <- function(df, candidate)
 ```
 
 ```{r}
+# Change column name X to more descriptive COUNTY
 print_mean_median(votes, 'buchanan')
 print_mean_median(votes, 'nader')
 ```
@@ -64,11 +65,13 @@ require('dplyr')
 ```
 
 ```{r}
-# Remove columns: select minor party candidates by removing GORE and BUSH cols
-minor_party_candidates <- votes %>% select(-BUSH, -GORE)
-summary(minor_party_candidates)
+# Change column X to more descriptive COUNTY and remove BUSH and GORE columns. Use pipes to chain operations
+votes <- votes %>% rename( COUNTY = X) %>% select(-BUSH, -GORE)
+colnames(votes)
 
+summary(minor_party_candidates)
 ```
+
 ```{r}
 # Remove rows - remove counties with fewer than 5000 votes
 minor_party_candidates_major_counties <- minor_party_candidates %>% filter(Total >= 5000)
