@@ -43,8 +43,8 @@ print_mean_median <- function(df, candidate)
     ucname = toupper(candidate)
     if (ucname %in% colnames(df))
     {
-    candidate_summary <- summary(df[ucname])
-    sprintf("Candidate %s has mean: %s and median: %s", ucname, candidate_summary[mean_idx], candidate_summary[median_idx])
+        candidate_summary <- summary(df[ucname])
+        sprintf("Candidate %s mean: %s and median: %s", ucname, candidate_summary[mean_idx], candidate_summary[median_idx])
     }
     else 
     {
@@ -65,7 +65,7 @@ require('dplyr')
 
 ```{r}
 # Remove columns: select minor party candidates by removing GORE and BUSH cols
-minor_party_candidates <- votes %>% select(!(BUSH | GORE))
+minor_party_candidates <- votes %>% select(-BUSH, -GORE)
 summary(minor_party_candidates)
 
 ```
@@ -84,10 +84,10 @@ print_mean_median(minor_party_candidates_major_counties, 'nader')
 ```
 
 ```{r}
-# Change column values. This data set does not contain any string columns. Instead, replace 0 vote counts for HARRIS to NA
+# Change column values. This data set does not contain any string columns. Instead, replace 0 vote counts in HARRIS column to NA
 #head(minor_party_candidates_major_counties)
 
-# Get a copy of HARRIS column and modify: replace 0 values with NA
+# Get copy of HARRIS column and modify: replace 0 values with NA
 harris_col <- minor_party_candidates_major_counties["HARRIS"]
 harris_col[harris_col == 0] <- NA
 
