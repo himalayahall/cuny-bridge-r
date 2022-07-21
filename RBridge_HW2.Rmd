@@ -66,6 +66,10 @@ require('dplyr')
 
 ```{r}
 # Change column X to more descriptive COUNTY and remove BUSH and GORE columns. Use pipes to chain operations
+```
+
+
+```{r}
 votes <- votes %>% rename( COUNTY = X) %>% select(-BUSH, -GORE)
 colnames(votes)
 
@@ -79,23 +83,29 @@ minor_party_candidates_major_counties <- minor_party_candidates %>% filter(Total
 sprintf('Old row count was: %d, New row count is: %d', nrow(minor_party_candidates), nrow(minor_party_candidates_major_counties))
 
 summary(minor_party_candidates_major_counties)
+
+# Means have gone up (as expected) because some lower values have been eliminated
+# Maxs have remained the same, some Mins have changecd for some (e.g. Buchanan Min went from 9.0 -> 22.0)
 ```
 
 ```{r}
 print_mean_median(minor_party_candidates_major_counties, 'buchanan')
 print_mean_median(minor_party_candidates_major_counties, 'nader')
 ```
+```{r}
+head(minor_party_candidates_major_counties)
+```
 
 ```{r}
-# Change column values. This data set does not contain any string columns. Instead, replace 0 vote counts in HARRIS column to NA
-#head(minor_party_candidates_major_counties)
-
-# Get copy of HARRIS column and modify: replace 0 values with NA
+# Change column values. This data set does not contain any string columns. Instead, replace 0 vote counts in HARRIS column (1) replace 0 values with NA, (2) replace 4's with 8, (3) replace 5's with 10
 harris_col <- minor_party_candidates_major_counties["HARRIS"]
 harris_col[harris_col == 0] <- NA
+harris_col[harris_col == 4] <- 8
+harris_col[harris_col == 5] <- 10
 
 # Replace HARRIS column in original data frame with modified column
 minor_party_candidates_major_counties["HARRIS"] <- harris_col
 head(minor_party_candidates_major_counties, 10)
 ```
+
 
