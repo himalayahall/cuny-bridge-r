@@ -72,8 +72,6 @@ require('dplyr')
 ```{r}
 votes <- votes %>% rename( COUNTY = X) %>% select(-BUSH, -GORE)
 colnames(votes)
-
-summary(minor_party_candidates)
 ```
 
 ```{r}
