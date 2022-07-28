@@ -1,0 +1,325 @@
+---
+title: "RBridge_HW3"
+author: "Jawaid Hakim"
+date: "`r Sys.Date()`"
+output: html_document
+#runtime: shiny
+displaymode: Showcase
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+Social scientists often recommend that measures of social well-being should augment measures of economic health such as GDP. Measures of social
+well-being are inherently subjective. How can happiness be measured?
+
+  The underlying source of the happiness scores in the **World Happiness Report** is the Gallup World Poll-a set of nationally representative surveys undertaken in more than 160 countries in over 140 languages. Respondents are asked: "Please imagine a ladder, with steps numbered from 0 at the bottom to 10 at the top. The top of the ladder represents the best possible life and the bottom of the ladder represents the worst possible life for you. On which step of the ladder would you say you personally stand at this time?" (Also known as the **Cantril Ladder**)
+  
+  This data set is simple yet interesting. Measuring happiness seems a good proxy for a number of other indicators. For instance, one hypothesis could be that a necessary condition for a high Cantril score is a high GDP. Put another way, a high Cantril score implies a high GDP. The converse is not necessarily true, a number of other factors like health care, climate, crime rate, population, etc impact the Cantril score.
+
+```{r }
+happydf <- read.table("happiness-cantril-ladder.csv", header=T, sep=",")
+str(happydf)
+unique(happydf$Country)
+```
+
+# Plotting
+A picture is worth a thousand words. 
+
+## Static Plot
+Cantril Ladder scores for a few pre-selected countries.
+
+```{r}
+library(ggplot2)
+library(stringr)
+library(forcats)
+library(dbplyr)
+library(plotly)
+
+happydf1 <- happydf %>% filter(Country %in% c("Afghanistan", "United Kingdon", "China", "Singapore", "India", "United States"))
+
+p <- ggplot(data = happydf1, mapping = aes(x = Year, y = CantrilLadderScore, color = Country)) + # specify data, x-axis, y-axis and grouping variable
+    geom_line() + # a line per group
+    geom_point(show.legend = T) + # points per group
+    #theme_hc() +
+    labs(title = "Cantril Ladder Score", # plot title
+       subtitle = "Score: 0 (worst), 10 (best)", # plot subtitle
+       caption = "Year") + # plot caption
+    theme(legend.position = "right", # move legend to the right hand side of the plot
+        axis.title.x = element_blank(), # remove x axis title
+        axis.title.y = element_blank(), # remove y axis title
+        legend.title = element_blank(), # remove legend title
+        plot.title = element_text(size = 20, color = "gray40"), # change size and color of plot title
+        plot.subtitle = element_text(color = "gray40"), # change color of subtitle
+        plot.caption = element_text(color = "gray40", hjust = 0)) + # change color of caption and left-align
+    scale_y_continuous(breaks = seq(0, 10, by = 1)) + # specify min, max and break distance for y axis
+    scale_x_continuous(breaks = seq(2003, 2020, by = 2)) # specify min, max and break distance for x axis
+    #theme_ipsum()
+    #expand_limits(y = c(0, 80))
+
+ggplotly(p)
+```
+
+## Interactive Plots
+In previous plot, the list of countries was pre-selected in code. That's well and good for a demo, but what if the user wants to view a different set of countries? Modifying the R program each time the country selection is updated is impractical. What if the user could select her countries of interest and have the plot reflect those selection?
+
+  Interactive plots enable user input. **Shiny** is a great R library for creating interactive plots and applications. The next plot allows user to select one or more countries for the Cantril Ladder plot. 
+
+```{r}
+library(shiny)
+library(ggplot2)
+library(dplyr)
+
+# uncomment this if you need to reload the happy table
+happydf <- read.table("happiness-cantril-ladder.csv", header=T, sep=",")
+
+## UI
+# Use a fluid Bootstrap layout
+ui <- fluidPage(    
+  
+  # Give the page a title
+  titlePanel("Cantril Ladder Score by Country over Time"),
+  
+  # Generate a row with a sidebar
+  sidebarLayout(      
+    
+    # Define the sidebar with one input
+    sidebarPanel(
+      checkboxGroupInput("Country", "Country:",
+                  choices=unique(happydf$Country), selected=c("United States")),
+      hr(),
+      helpText("Data from Happiness Project.")
+    ),
+    
+    # Create a spot for the plot
+    mainPanel(plotlyOutput("happinessPlot"))
+  )
+)
+
+## Server
+
+# Define a server for the Shiny app
+server <- function(input, output) {
+  
+  # Fill in the spot we created for a plot
+  output$happinessPlot <- renderPlotly({
+    
+    happydf %>% 
+      filter(Country %in% input$Country) %>% 
+
+	ggplot(mapping = aes(x = Year, y = CantrilLadderScore, color = Country)) + # specify data, x-axis, y-axis and grouping variable
+
+    	geom_line() + # a line per group
+
+    	geom_point(show.legend = T) + # points per group
+
+  	#theme_hc() +  # a ggtheme, similar to your example
+
+    	labs(title = "Cantril Ladder Score", # plot title
+
+       	subtitle = "Score: 0 (least happy), 10 (most happy)", # plot subtitle
+
+       	caption = "Year") + # plot caption
+
+    	theme(legend.position = "right", # move legend to the right hand side of the plot
+
+        axis.title.x = element_blank(), # remove x axis title
+        axis.title.y = element_blank(), # remove y axis title
+        legend.title = element_blank(), # remove legend title
+        plot.title = element_text(size = 20, color = "gray40"), # change size and color of plot title
+        plot.subtitle = element_text(color = "gray40"), # change color of subtitle
+        plot.caption = element_text(color = "gray40", hjust = 0)) + # change color of caption and left-align
+    scale_y_continuous(breaks = seq(0, 10, by = 1)) + # specify min, max and break distance for y axis
+    scale_x_continuous(breaks = seq(2003, 2020, by = 2)) # specify min, max and break distance for x axis
+    #theme_ipsum()
+    #expand_limits(y = c(0, 80))
+
+  })
+}
+
+shinyApp(ui = ui, server = server)
+
+```
+```{r}
+library(shiny)
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+library(plotly)
+
+# uncomment this if you need to reload the happy table
+happydf <- read.table("happiness-cantril-ladder.csv", header=T, sep=",")
+
+c(min(happydf$Year):max(happydf$Year))
+
+## UI
+# Use a fluid Bootstrap layout
+ui <- fluidPage(    
+  
+  # Give the page a title
+  titlePanel("Cantril Ladder Score by Country over Time"),
+  
+  # Generate a row with a sidebar
+  sidebarLayout(      
+    
+    # Define the sidebar with two inputs
+    sidebarPanel(
+      selectInput("StartDate", "Start Date:", choices = c(min(happydf$Year):max(happydf$Year)),selected=min(happydf$Year)),
+      selectInput("EndDate", "End Date:", choices = c(min(happydf$Year):max(happydf$Year)),selected=max(happydf$Year)),
+      checkboxGroupInput("Country", "Country:", choices=unique(happydf$Country), selected=c("United States")),
+      
+      hr(),
+      helpText("Data from Happiness Project.")
+    ),
+    
+    # Create a spot for the plot
+    mainPanel(
+      plotlyOutput("happinessPlot")  
+    )
+    
+  )
+)
+
+## Server
+
+# Define a server for the Shiny app
+server <- function(input, output) {
+  
+  # Fill in the spot we created for a plot
+  output$happinessPlot <- renderPlotly({
+      
+    #cat(file=stderr(), "drawing plot start", input$StartDate, "dates", "\n")
+    #cat(file=stderr(), "drawing plot end", input$EndDate, "dates", "\n")
+    validate(
+      need(input$EndDate > input$StartDate, 'Must select at least 1 year date range')
+     )
+    
+    happydf %>% 
+        filter(Country %in% input$Country) %>% 
+
+        filter(between(as.integer(Year), as.integer(input$StartDate), as.integer(input$EndDate))) %>% 
+          
+	    ggplot(mapping = aes(x = Year, y = CantrilLadderScore, color = Country)) + # specify data, x-axis, y-axis and grouping variable
+
+    	geom_line() + # a line per group
+
+    	geom_point(show.legend = T) + # points per group
+
+  	#theme_hc() +  # a ggtheme, similar to your example
+
+    	labs(title = "Cantril Ladder Score", # plot title
+
+       	subtitle = "Score: 0 (least happy), 10 (most happy)", # plot subtitle
+
+       	caption = "Year") + # plot caption
+
+    	theme(legend.position = "right", # move legend to the right hand side of the plot
+
+        axis.title.x = element_blank(), # remove x axis title
+        axis.title.y = element_blank(), # remove y axis title
+        legend.title = element_blank(), # remove legend title
+        plot.title = element_text(size = 20, color = "gray40"), # change size and color of plot title
+        plot.subtitle = element_text(color = "gray40"), # change color of subtitle
+        plot.caption = element_text(color = "gray40", hjust = 0)) + # change color of caption and left-align
+    scale_y_continuous(breaks = seq(0, 10, by = 1)) + # specify min, max and break distance for y axis
+    scale_x_continuous(breaks = seq(2003, 2020, by = 2)) # specify min, max and break distance for x axis
+    #theme_ipsum()
+    #expand_limits(y = c(0, 80))
+
+  })
+}
+
+shinyApp(ui = ui, server = server)
+
+```
+
+## Maps
+Maps are a great way to display data by GEO location Here we use GEO coordinates to draw a world map. To display the Cantril score for each country we do a number of transformations. First, we group the data by Country and calculate the mean score for last 10 years. The mean is then used as the 'fill' for the country on the map.
+
+```{r}
+#install.packages(c("cowplot", "googleway", "ggplot2", "ggrepel", 
+#"ggspatial", "libwgeom", "sf", "rnaturalearth", "rnaturalearthdata"))
+
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(maps)
+#theme_set(theme_bw())
+library("sf")
+library(dplyr)
+library(ggplot2)
+library(scales)
+
+#world <- map_data("world")
+world <- ne_countries(scale = "small", returnclass = "sf")
+#str(world)
+#colnames(world)
+#head(world)
+
+# Compute mean score by Country for all years after 2015
+world %>% filter(world$name == "Germany") %>% select(gdp_md_est, pop_est)
+
+maxYear <- max(happydf$Year)
+happydf_for_plt <- happydf %>% filter(Year == maxYear) %>% rename(Score = CantrilLadderScore)
+#colnames(happydf_for_plt)
+
+geo_happydf <- left_join(happydf_for_plt, world, by=c("Country" = "name"))
+happinessMap = ggplot(data = geo_happydf) +
+    geom_sf(aes(geometry = geometry, fill=Score)) +
+    theme_void() +
+    xlab("Longitude") + ylab("Latitude") +
+    ggtitle(sprintf("World Cantril Ladder Score: %d", maxYear)) + 
+    scale_fill_viridis_c(option = "plasma") 
+    #theme(legend.position = "none")
+happinessMap
+```
+
+# Interactive Map
+Above map is nice, but, for geographically challenged users like myself, it would be great  to be able to find out the names of countries on mouse hover. Fortunately, this is straightforward to do using **geom_sf_interactive** and **girafe**.
+
+```{r}
+#install.packages(c("cowplot", "googleway", "ggplot2", "ggrepel", 
+#"ggspatial", "libwgeom", "sf", "rnaturalearth", "rnaturalearthdata"))
+
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(maps)
+#theme_set(theme_bw())
+library(sf)
+library(ggiraph)
+library(dplyr)
+library(ggplot2)
+library(scales)
+
+#world <- map_data("world")
+world <- ne_countries(scale = "small", returnclass = "sf")
+#str(world)
+#colnames(world)
+#head(world)
+
+maxYear <- max(happydf$Year)
+happydf_for_plt <- happydf %>% filter(Year == maxYear) %>% rename(Score = CantrilLadderScore)
+
+geo_happydf <- left_join(happydf_for_plt, world, by=c("Country" = "name"))
+happinessMap = ggplot(data = geo_happydf) +
+    geom_sf_interactive(aes(geometry=geometry, fill=Score, tooltip=sprintf("%s<br>%s<br>%2.3f<br>%s<br>Pop Est: %s<br>GDP Est: %s", iso_a3, formal_en, Score, economy, format(pop_est, big.mark=','), format(gdp_md_est, big.mark=',')))) +
+    theme_void() +
+    xlab("Longitude") + ylab("Latitude") +
+    ggtitle(sprintf("World Cantril Ladder Score: %d", maxYear)) + 
+    scale_fill_viridis_c(option = "plasma") 
+    #theme(legend.position = "none")
+
+happinessMap <- girafe(code, 
+                    ggobj = happinessMap,
+                    options = list(opts_tooltip(use_fill = TRUE),
+                                   opts_zoom(min = 1, max = 5),
+                                   opts_toolbar(saveaspng = FALSE)))
+happinessMap
+```
+
+## Conclusion
+This project worked with a simple data set that contained the Cantril Ladder score for 165 countries between 2003-2020. Interactive maps were a good tool to explore gloabl Cantril scores by region and continent. Combining this data with other indicators like GDP to explore the relationship between economic well-being and happiness in interesting. However, in this project, source of the economic data is the *world map*, and the accuracy of the GDP data is not known (it is no more recent than 2018). A subsequent project could combine robust economic indicators to explore the relationship between happines and other metrics. 
+
